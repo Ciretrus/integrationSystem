@@ -21,3 +21,6 @@ C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-wi
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-windows\Mobile_individ.csproj.AssemblyReference.cache
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-windows\Mobile_i.6D962AFB.Up2Date
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-windows\Mobile_individ.MainForm.resources
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-windows\Mobile_individ.StockForm.resources
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\Microsoft.Office.Interop.Word.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\Microsoft.Office.Interop.Excel.dll

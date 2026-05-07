@@ -114,7 +114,12 @@ namespace Mobile_individ
 
         private void btnExportWord_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Здесь будет логика экспорта в Word");
+            if (dgvOrders.SelectedRows.Count > 0)
+            {
+                string name = dgvOrders.SelectedRows[0].Cells["Клиент"].Value.ToString();
+                DataTable dt = (DataTable)dgvOrderItems.DataSource;
+                WordHelper.ExportOrderToWord(name, dt);
+            }
         }
     }
 }
