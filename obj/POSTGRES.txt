@@ -1,0 +1,32 @@
+-- 1. Справочник товаров
+CREATE TABLE Products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    unit VARCHAR(50) -- ед. измерения (шт, кг и т.д.)
+);
+
+-- 2. Закупки (Приходная накладная + Логика FIFO)
+CREATE TABLE Purchases (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES Products(id) ON DELETE CASCADE,
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    quantity INTEGER NOT NULL,
+    purchase_price DECIMAL(10, 2) NOT NULL
+);
+
+-- 3. Заказы (Шапка заказа)
+CREATE TABLE Orders (
+    id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(255) NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_shipped BOOLEAN DEFAULT FALSE -- статус отгрузки
+);
+
+-- 4. Состав заказа (Связанная таблица)
+CREATE TABLE Order_Items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES Orders(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES Products(id),
+    quantity INTEGER NOT NULL,
+    sale_price DECIMAL(10, 2) NOT NULL
+);
