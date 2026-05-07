@@ -9,9 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
-    <PackageReference Include="Microsoft.Office.Interop.Excel" Version="16.0.18925.20022" />
-    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
     <PackageReference Include="Npgsql" Version="10.0.2" />
   </ItemGroup>
 

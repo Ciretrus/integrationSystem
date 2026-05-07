@@ -14,38 +14,52 @@ namespace Mobile_individ
             LoadProductsToCombo();
         }
 
-        // Загрузка заказов в верхнюю таблицу
+        // 1. Загрузка заказов в верхнюю таблицу
         private void LoadOrders()
         {
-            using (var conn = DbHelper.GetConnection())
+            try
             {
-                conn.Open();
-                string sql = "SELECT id, customer_name AS \"Клиент\", order_date AS \"Дата\" FROM Orders ORDER BY id DESC";
-                NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvOrders.DataSource = dt;
-                if (dgvOrders.Columns["id"] != null) dgvOrders.Columns["id"].Visible = false;
+                using (var conn = DbHelper.GetConnection())
+                {
+                    conn.Open();
+                    string sql = "SELECT id, customer_name AS \"Клиент\", order_date AS \"Дата\" FROM Orders ORDER BY id DESC";
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvOrders.DataSource = dt;
+                    if (dgvOrders.Columns["id"] != null) dgvOrders.Columns["id"].Visible = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки заказов: " + ex.Message);
             }
         }
 
-        // Наполнение списка товаров (Выбор по названию, ТЗ выполнено)
+        // 2. Наполнение списка товаров (Выбор по названию)
         private void LoadProductsToCombo()
         {
-            using (var conn = DbHelper.GetConnection())
+            try
             {
-                conn.Open();
-                string sql = "SELECT id, name FROM Products ORDER BY name";
-                NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                cmbProducts.DataSource = dt;
-                cmbProducts.DisplayMember = "name";
-                cmbProducts.ValueMember = "id";
+                using (var conn = DbHelper.GetConnection())
+                {
+                    conn.Open();
+                    string sql = "SELECT id, name FROM Products ORDER BY name";
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    cmbProducts.DataSource = dt;
+                    cmbProducts.DisplayMember = "name";
+                    cmbProducts.ValueMember = "id";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки списка товаров: " + ex.Message);
             }
         }
 
-        // При клике на заказ — грузим его состав в нижнюю таблицу
+        // 3. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ СОСТАВА (При клике на строку заказа)
         private void dgvOrders_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvOrders.SelectedRows.Count > 0 && dgvOrders.SelectedRows[0].Cells["id"].Value != DBNull.Value)
@@ -74,10 +88,15 @@ namespace Mobile_individ
             }
         }
 
-        // Создание нового заказа
+        // 4. Создание нового заказа
         private void btnCreateOrder_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCustomerName.Text)) return;
+            if (string.IsNullOrWhiteSpace(txtCustomerName.Text))
+            {
+                MessageBox.Show("Введите имя клиента!");
+                return;
+            }
+
             using (var conn = DbHelper.GetConnection())
             {
                 conn.Open();
@@ -90,36 +109,92 @@ namespace Mobile_individ
             txtCustomerName.Clear();
         }
 
-        // Добавление товара в выбранный заказ
+        // 5. Добавление товара в выбранный заказ
         private void btnAddToOrder_Click(object sender, EventArgs e)
         {
-            if (dgvOrders.SelectedRows.Count == 0) return;
-
-            int orderId = Convert.ToInt32(dgvOrders.SelectedRows[0].Cells["id"].Value);
-            int productId = (int)cmbProducts.SelectedValue;
-
-            using (var conn = DbHelper.GetConnection())
+            if (dgvOrders.SelectedRows.Count == 0)
             {
-                conn.Open();
-                string sql = "INSERT INTO Order_Items (order_id, product_id, quantity, sale_price) VALUES (@o, @p, @q, @s)";
-                NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("o", orderId);
-                cmd.Parameters.AddWithValue("p", productId);
-                cmd.Parameters.AddWithValue("q", int.Parse(txtQty.Text));
-                cmd.Parameters.AddWithValue("s", decimal.Parse(txtPrice.Text));
-                cmd.ExecuteNonQuery();
+                MessageBox.Show("Сначала выберите заказ в верхней таблице!");
+                return;
             }
-            LoadOrderItems(orderId);
+
+            try
+            {
+                int orderId = Convert.ToInt32(dgvOrders.SelectedRows[0].Cells["id"].Value);
+                int productId = (int)cmbProducts.SelectedValue;
+
+                using (var conn = DbHelper.GetConnection())
+                {
+                    conn.Open();
+                    string sql = "INSERT INTO Order_Items (order_id, product_id, quantity, sale_price) VALUES (@o, @p, @q, @s)";
+                    NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("o", orderId);
+                    cmd.Parameters.AddWithValue("p", productId);
+                    cmd.Parameters.AddWithValue("q", int.Parse(txtQty.Text));
+                    cmd.Parameters.AddWithValue("s", decimal.Parse(txtPrice.Text));
+                    cmd.ExecuteNonQuery();
+                }
+                LoadOrderItems(orderId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при добавлении: " + ex.Message);
+            }
         }
 
+        // 6. Экспорт в Word (через NPOI)
         private void btnExportWord_Click(object sender, EventArgs e)
         {
-            if (dgvOrders.SelectedRows.Count > 0)
+            if (dgvOrders.SelectedRows.Count > 0 && dgvOrderItems.DataSource != null)
             {
                 string name = dgvOrders.SelectedRows[0].Cells["Клиент"].Value.ToString();
                 DataTable dt = (DataTable)dgvOrderItems.DataSource;
                 WordHelper.ExportOrderToWord(name, dt);
             }
+            else
+            {
+                MessageBox.Show("Выберите заказ с товарами для экспорта!");
+            }
+        }
+
+        // 7. Экспорт отчета в Excel (через NPOI - логика убыточных товаров)
+        private void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            using (var conn = DbHelper.GetConnection())
+            {
+                conn.Open();
+                // SQL запрос для поиска товаров, проданных дешевле закупки
+                string sql = @"
+                    SELECT p.name, oi.quantity, pur.purchase_price, oi.sale_price
+                    FROM Order_Items oi
+                    JOIN Products p ON oi.product_id = p.id
+                    JOIN Purchases pur ON p.id = pur.product_id
+                    WHERE oi.sale_price < pur.purchase_price";
+
+                NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                    ExcelHelper.ExportProfitReport(dt);
+                else
+                    MessageBox.Show("Убыточных товаров за период не найдено.");
+            }
+        }
+
+        // 8. Открытие окна склада (Приход товара)
+        private void btnOpenStock_Click(object sender, EventArgs e)
+        {
+            StockForm stockForm = new StockForm();
+            stockForm.ShowDialog();
+        }
+        
+        // 9. Открытие справочника товаров (Form1)
+        private void btnOpenProducts_Click(object sender, EventArgs e)
+        {
+            Form1 productsForm = new Form1();
+            productsForm.ShowDialog();
+            LoadProductsToCombo(); // Обновляем комбобокс после закрытия, вдруг добавили новые товары
         }
     }
 }

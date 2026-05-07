@@ -24,3 +24,9 @@ C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-wi
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\obj\Debug\net8.0-windows\Mobile_individ.StockForm.resources
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\Microsoft.Office.Interop.Word.dll
 C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\Microsoft.Office.Interop.Excel.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\NOTICE.TXT
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\NPOI.OOXML.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\NPOI.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\NPOI.OpenXml4Net.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\NPOI.OpenXmlFormats.dll
+C:\Users\ciretrus\source\repos\Mobile_individ\Mobile_individ\bin\Debug\net8.0-windows\ICSharpCode.SharpZipLib.dll

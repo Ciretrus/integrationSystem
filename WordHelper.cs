@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.IO;
+using NPOI.XWPF.UserModel; // Библиотека NPOI
 
 namespace Mobile_individ
 {
@@ -9,51 +11,47 @@ namespace Mobile_individ
         {
             try
             {
-                Type wordType = Type.GetTypeFromProgID("Word.Application");
-                if (wordType == null)
+                string fileName = $"Заказ_{customerName}_{DateTime.Now:yyyyMMdd_HHmm}.docx";
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName);
+
+                using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
-                    System.Windows.Forms.MessageBox.Show("MS Word не установлен!");
-                    return;
+                    XWPFDocument doc = new XWPFDocument();
+
+                    // Заголовок
+                    XWPFParagraph p1 = doc.CreateParagraph();
+                    p1.Alignment = ParagraphAlignment.CENTER;
+                    XWPFRun r1 = p1.CreateRun();
+                    r1.IsBold = true;
+                    r1.FontSize = 18;
+                    r1.SetText($"Заказ для клиента: {customerName}");
+
+                    // Таблица (строки: данные + 1 для шапки; столбцы: 3)
+                    XWPFTable table = doc.CreateTable(items.Rows.Count + 1, 3);
+                    table.Width = 5000; // Ширина таблицы
+
+                    // Шапка
+                    table.GetRow(0).GetCell(0).SetText("Товар");
+                    table.GetRow(0).GetCell(1).SetText("Кол-во");
+                    table.GetRow(0).GetCell(2).SetText("Цена");
+
+                    // Заполнение данными
+                    for (int i = 0; i < items.Rows.Count; i++)
+                    {
+                        XWPFTableRow row = table.GetRow(i + 1);
+                        row.GetCell(0).SetText(items.Rows[i]["Товар"]?.ToString() ?? "-");
+                        row.GetCell(1).SetText(items.Rows[i]["Кол-во"]?.ToString() ?? "0");
+                        row.GetCell(2).SetText(items.Rows[i]["Цена"]?.ToString() ?? "0");
+                    }
+
+                    doc.Write(fs);
                 }
 
-                dynamic wordApp = Activator.CreateInstance(wordType);
-                wordApp.Visible = true;
-
-                // Добавляем документ
-                dynamic documents = wordApp.Documents;
-                dynamic document = documents.Add();
-
-                // Пишем заголовок напрямую в начало документа
-                dynamic range = document.Range(0, 0);
-                range.Text = $"Заказ для клиента: {customerName}\n\n";
-                range.Font.Bold = 1;
-                range.Font.Size = 16;
-
-                // Определяем место для таблицы (в конце документа)
-                int end = document.Content.End;
-                dynamic tableRange = document.Range(end - 1, end - 1);
-
-                // Создаем таблицу
-                dynamic tables = document.Tables;
-                dynamic table = tables.Add(tableRange, items.Rows.Count + 1, 3);
-                table.Borders.Enable = 1; // Включаем границы
-
-                // Шапка таблицы
-                table.Cell(1, 1).Range.Text = "Товар";
-                table.Cell(1, 2).Range.Text = "Кол-во";
-                table.Cell(1, 3).Range.Text = "Цена";
-
-                // Данные
-                for (int i = 0; i < items.Rows.Count; i++)
-                {
-                    table.Cell(i + 2, 1).Range.Text = items.Rows[i]["Товар"]?.ToString();
-                    table.Cell(i + 2, 2).Range.Text = items.Rows[i]["Кол-во"]?.ToString();
-                    table.Cell(i + 2, 3).Range.Text = items.Rows[i]["Цена"]?.ToString();
-                }
+                System.Windows.Forms.MessageBox.Show($"Word-файл создан на рабочем столе:\n{fileName}");
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Ошибка Word: " + ex.Message);
+                System.Windows.Forms.MessageBox.Show("Ошибка NPOI (Word): " + ex.Message);
             }
         }
     }
